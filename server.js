@@ -45,6 +45,10 @@ app.get("/api/image/:filename", (req, res) => {
   });
 });
 
+app.get("/", (req, res)=>{
+  res.json("Visitpass API");
+});
+
 // API routes
 app.use("/api/auth", authRoutes); // Add this line
 app.use("/api/visitors", visitorRoutes);
