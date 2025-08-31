@@ -9,8 +9,8 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: true,
     unique: true,
+    sparse: true,
     trim: true,
     lowercase: true,
     match: [
@@ -20,8 +20,12 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
     minlength: 6,
+  },
+  phoneNumber: {
+    type: String,
+    unique: true,
+    sparse: true,
   },
   role: {
     type: String,
@@ -31,7 +35,7 @@ const userSchema = new mongoose.Schema({
   visitorId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Visitor",
-    sparse: true, // Only visitors will have this
+    sparse: true,
   },
   isActive: {
     type: Boolean,
@@ -43,7 +47,6 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-// Hash password before saving
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
     return next();
@@ -58,7 +61,6 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-// Method to compare passwords
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };

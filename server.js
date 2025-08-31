@@ -1,3 +1,4 @@
+// server.js
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -50,7 +51,7 @@ app.get("/", (req, res)=>{
 });
 
 // API routes
-app.use("/api/auth", authRoutes); // Add this line
+app.use("/api/auth", authRoutes);
 app.use("/api/visitors", visitorRoutes);
 app.use("/api/access", accessRoutes);
 app.use("/api/reports", reportRoutes);
