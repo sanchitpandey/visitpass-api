@@ -19,7 +19,6 @@ const allowedOrigins = [
 
 const corsOptions = {
     origin: (origin, callback) => {
-        // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
         
         const isAllowed = allowedOrigins.some(allowedOrigin => {
@@ -32,20 +31,17 @@ const corsOptions = {
         if (isAllowed) {
             callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+            callback(null, false);
         }
     },
     credentials: true,
-    optionsSuccessStatus: 200 
+    optionsSuccessStatus: 200
 };
 
-// Connect to database
 connectDB();
 
-// Initialize express app
 const app = express();
 
-// Use the new, robust CORS options
 app.use(cors(corsOptions));
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -72,6 +68,7 @@ app.use("/api/visitors", visitorRoutes);
 app.use("/api/access", accessRoutes);
 app.use("/api/reports", reportRoutes);
 
+// Base route
 app.get("/", (req, res) => {
     res.json({ message: "Welcome to Hospital Visitor Management API" });
 });
