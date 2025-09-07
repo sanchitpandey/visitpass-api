@@ -47,7 +47,6 @@ exports.registerVisitor = async (req, res) => {
     }
 
     const qrData = `VISITOR:${name}:${aadhaarNumber}:${Date.now()}`;
-    //const qrCodeData = await generateQRCode(qrData);
 
     const newVisitor = new Visitor({
       name,
