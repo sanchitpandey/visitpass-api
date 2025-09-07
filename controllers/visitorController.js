@@ -8,102 +8,98 @@ const mongoose = require("mongoose");
 
 // Register a new visitor
 exports.registerVisitor = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
+    const { phone_number } = req.user;
     const {
       name,
-      phoneNumber,
-      aadhaarNumber,
-      address,
       email,
-      password,
-      purpose,
+      aadhaarNumber,
+      age,
+      sex,
+      address,
+      officialToMeet,
+      referredBy,
+      diseases,
     } = req.body;
 
-    // Validate input
-    if (!name || !phoneNumber || !aadhaarNumber || !email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Please provide all required fields" });
+    if (!name || !email || !aadhaarNumber || !age || !sex || !address || !officialToMeet) {
+      return res.status(400).json({ success: false, message: 'Please provide all required fields.' });
+    }
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Selfie image is required.' });
     }
 
-    // Check if user with this email already exists
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res
-        .status(400)
-        .json({ message: "User with this email already exists" });
+    const existingUser = await User.findOne({ phoneNumber: phone_number }).session(session);
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'A user with this phone number is already registered.' });
     }
-
-    // Check if visitor with this Aadhaar already exists
-    const existingVisitor = await Visitor.findOne({ aadhaarNumber });
+    const existingVisitor = await Visitor.findOne({ aadhaarNumber }).session(session);
     if (existingVisitor) {
-      return res
-        .status(400)
-        .json({ message: "Visitor with this Aadhaar number already exists" });
+      return res.status(400).json({ success: false, message: 'A visitor with this Aadhaar number is already registered.' });
     }
 
-    // Verify Aadhaar (simulated)
     const isAadhaarValid = await verifyAadhaar(aadhaarNumber);
     if (!isAadhaarValid) {
-      return res.status(400).json({ message: "Invalid Aadhaar number" });
+      return res.status(400).json({ success: false, message: 'Invalid Aadhaar number format.' });
     }
 
-    // Generate QR code
     const qrData = `VISITOR:${name}:${aadhaarNumber}:${Date.now()}`;
-    const qrCodeData = await generateQRCode(qrData);
+    //const qrCodeData = await generateQRCode(qrData);
 
-    // Create new visitor
-    const visitor = new Visitor({
+    const newVisitor = new Visitor({
       name,
-      phoneNumber,
+      phoneNumber: phone_number,
       email,
       aadhaarNumber,
-      address: address || "",
-      qrCodeData,
-      selfieUrl: req.file ? req.file.path : "",
+      age,
+      sex,
+      address,
+      officialToMeet,
+      referredBy,
+      diseases,
+      qrCodeData: qrData,
+      selfieUrl: req.file.path,
     });
+    await newVisitor.save({ session });
 
-    await visitor.save();
-
-    // Create user account for the visitor
-    const user = new User({
+    const newUser = new User({
       name,
       email,
-      password,
-      role: "visitor",
-      visitorId: visitor._id,
+      phoneNumber: phone_number,
+      firebaseUid: req.user.uid,
+      role: 'visitor',
+      visitorId: newVisitor._id, // Link the user to their visitor profile
     });
+    await newUser.save({ session });
 
-    await user.save();
-
-    // Generate token for immediate login
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      { id: newUser._id, role: newUser.role },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRE || "30d" }
+      { expiresIn: process.env.JWT_EXPIRE || '30d' }
     );
+
+    await session.commitTransaction();
 
     res.status(201).json({
       success: true,
-      message: "Visitor registered successfully",
+      message: 'Visitor registered successfully',
       token,
       user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-      visitor: {
-        id: visitor._id,
-        qrCode: qrCodeData,
+        id: newUser._id,
+        name: newUser.name,
+        role: newUser.role,
       },
     });
+
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: error.message,
-    });
+    await session.abortTransaction();
+    console.error("Registration Error:", error);
+    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+  } finally {
+    session.endSession();
   }
 };
 
@@ -208,7 +204,6 @@ exports.getVisitorById = async (req, res) => {
 // Get visitor's own information
 exports.getMyVisitorInfo = async (req, res) => {
   try {
-    console.log(req.params);
     if (!req.user.visitorId) {
       return res.status(404).json({ message: "Visitor record not found" });
     }

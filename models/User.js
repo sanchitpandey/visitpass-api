@@ -27,6 +27,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     sparse: true,
   },
+  firebaseUid: { type: String, unique: true, sparse: true },
   role: {
     type: String,
     enum: ["admin", "security", "visitor"],

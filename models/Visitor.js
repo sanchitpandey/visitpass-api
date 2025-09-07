@@ -23,6 +23,35 @@ const visitorSchema = new mongoose.Schema({
     unique: true,
     trim: true,
   },
+    age: {
+    type: Number,
+    required: true,
+  },
+  sex: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  address: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  officialToMeet: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  referredBy: { 
+    type: String,
+    trim: true,
+    default: '',
+  },
+  diseases: {
+    type: String,
+    trim: true,
+    default: '',
+  },
   selfieUrl: {
     type: String,
     required: true,
@@ -37,10 +66,8 @@ const visitorSchema = new mongoose.Schema({
     enum: ["outside premises", "inside premises"],
     default: "outside premises",
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
+}, {
+  timestamps: true
 });
 
 module.exports = mongoose.model("Visitor", visitorSchema);

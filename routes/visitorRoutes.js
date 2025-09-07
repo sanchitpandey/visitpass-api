@@ -8,6 +8,7 @@ const {
   security,
   admin,
   visitor,
+  firebaseAuth,
 } = require("../middleware/authMiddleware");
 
 // Configure multer for file uploads
@@ -25,6 +26,7 @@ const upload = multer({ storage });
 // Public route for visitor registration - creates both visitor record and user account
 router.post(
   "/register",
+  firebaseAuth,
   upload.single("selfie"),
   visitorController.registerVisitor
 );
