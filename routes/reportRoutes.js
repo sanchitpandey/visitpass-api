@@ -2,9 +2,9 @@
 const express = require("express");
 const router = express.Router();
 const reportController = require("../controllers/reportController");
-const { protect } = require("../middleware/authMiddleware");
+const { protect, admin } = require("../middleware/authMiddleware");
 
 // Routes
-router.get("/daily", protect, reportController.generateDailyReport);
+router.get("/daily", protect, admin, reportController.generateDailyReport);
 
 module.exports = router;

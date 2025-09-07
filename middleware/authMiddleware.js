@@ -6,7 +6,6 @@ const firebaseAdmin = require('../config/firebaseAdmin');
 exports.protect = async (req, res, next) => {
   let token;
 
-  // Check for token in headers
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
@@ -21,10 +20,8 @@ exports.protect = async (req, res, next) => {
   }
 
   try {
-    // Verify token
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    // Add user from payload to request
     req.user = await User.findById(decoded.id).select("-password");
 
     if (!req.user) {

@@ -6,11 +6,15 @@ const { PORT } = require("./config/env");
 const connectDB = require("./config/db");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 
-// Import routes
 const visitorRoutes = require("./routes/visitorRoutes");
 const accessRoutes = require("./routes/accessRoutes");
 const reportRoutes = require("./routes/reportRoutes");
-const authRoutes = require("./routes/authRoutes"); // Add this line
+const authRoutes = require("./routes/authRoutes");
+
+const allowedOrigins = [
+  "https://visitpass-react-e4tlcrluj-sanchitpandeys-projects.vercel.app", // your frontend
+  "http://localhost:3000", // local dev
+];
 
 // Connect to database
 connectDB();
@@ -24,7 +28,12 @@ app.use("/uploads", (req, res, next) => {
 }, express.static(path.join(__dirname, "uploads")));
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
