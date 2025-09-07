@@ -11,7 +11,7 @@
       "src": "/(.*)",
       "methods": ["OPTIONS"],
       "headers": {
-        "Access-Control-Allow-Origin": "$CLIENT_ORIGIN_URL",
+        "Access-Control-Allow-Origin": "https://visitpass-react.vercel.app",
         "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Authorization, X-Requested-With, Content-Type",
         "Access-Control-Allow-Credentials": "true"
@@ -21,7 +21,7 @@
     {
       "src": "/(.*)",
       "headers": {
-        "Access-Control-Allow-Origin": "$CLIENT_ORIGIN_URL",
+        "Access-Control-Allow-Origin": "https://visitpass-react.vercel.app",
         "Access-Control-Allow-Credentials": "true"
       },
       "dest": "server.js"
