@@ -170,8 +170,6 @@ exports.firebaseLogin = async (req, res) => {
   try {
     const decodedToken = await firebaseAdmin.auth().verifyIdToken(token);
 
-    // --- THIS IS THE KEY CHANGE ---
-    // We now find the user by their permanent, unique Firebase ID (uid)
     const user = await User.findOne({ firebaseUid: decodedToken.uid });
 
     if (!user) {
