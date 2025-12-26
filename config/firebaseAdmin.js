@@ -1,6 +1,7 @@
 const admin = require('firebase-admin');
 
 const serviceAccountString = process.env.FIREBASE_SERVICE_ACCOUNT;
+const bucket = process.env.FIREBASE_STORAGE_BUCKET;
 
 let firebaseAdmin;
 
@@ -13,6 +14,7 @@ if (!serviceAccountString) {
 
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
+      storageBucket: bucket,
     });
 
 

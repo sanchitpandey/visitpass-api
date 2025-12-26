@@ -5,6 +5,7 @@ const verifyAadhaar = require("../utils/aadhaarVerification");
 const generateQRCode = require("../utils/qrCodeGenerator");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
+const { uploadImageToFirebase } = require("../utils/firebaseStorage");
 
 // Register a new visitor
 exports.registerVisitor = async (req, res) => {
@@ -31,6 +32,8 @@ exports.registerVisitor = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'Selfie image is required.' });
     }
+
+    const selfieUrl = await uploadImageToFirebase(req.file);
 
     const existingUser = await User.findOne({ phoneNumber: phone_number }).session(session);
     if (existingUser) {
@@ -60,7 +63,7 @@ exports.registerVisitor = async (req, res) => {
       referredBy,
       diseases,
       qrCodeData: qrData,
-      selfieUrl: req.file.path,
+      selfieUrl: selfieUrl,
     });
     await newVisitor.save({ session });
 
