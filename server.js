@@ -11,25 +11,21 @@ const accessRoutes = require("./routes/accessRoutes");
 const reportRoutes = require("./routes/reportRoutes");
 const authRoutes = require("./routes/authRoutes");
 
-connectDB();
 const app = express();
 
-app.use(cors());
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error("Mongo connect failed", err);
+    res.status(500).json({ message: "Database unavailable" });
+  }
+});
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
-app.get("/api/image/:filename", (req, res) => {
-    const filename = req.params.filename;
-    const imagePath = path.join(__dirname, "uploads", filename);
-    res.sendFile(imagePath, (err) => {
-        if (err) {
-            console.error(`Error sending file: ${err.message}`);
-            res.status(404).send("Image not found");
-        }
-    });
-});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/visitors", visitorRoutes);
@@ -37,16 +33,16 @@ app.use("/api/access", accessRoutes);
 app.use("/api/reports", reportRoutes);
 
 app.get("/", (req, res) => {
-    res.json({ message: "Welcome to Hospital Visitor Management API" });
+  res.json({ message: "Welcome to Hospital Visitor Management API" });
 });
 
 app.use(notFound);
 app.use(errorHandler);
 
-if (process.env.NODE_ENV !== 'test') {
-    app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-    });
+if (process.env.NODE_ENV !== "test") {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 }
 
 module.exports = app;
